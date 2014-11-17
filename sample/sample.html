@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<title>sample | km-sjonlistview</title>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script type="text/javascript" src="./km-jsonlistview.js"></script>
+<script type="text/javascript">
+
+var EntYearlyLst = new classKMJSONListView();
+
+$(document).ready(function(){
+
+  $.getJSON("./sample_entry_data.js?201311271159", null, function(data){
+
+    var prm__source__listview_wrapper = {
+        open: "<h2>お知らせ</h2>",
+        close: ""
+    }
+
+    var prm__pagination_link_btn_selecters = {
+        top:"p.top a",
+        prev:"p.pre a",
+        item_current:"",
+        item:"li a",
+        next:"p.next a",
+        last:"p.last a"
+    };
+
+    var prm__source__hash_pagination_link = {
+open:"<div class=\"pagination\">",
+inner_html:{
+  open:"<div>",
+  btn:{
+    top:"<p class=\"top\"><a href=\"#LayerContents\">&lt;&lt;&nbsp;最初</a></p>",
+    prev:"<p class=\"pre\"><a href=\"#LayerContents\">&lt;&nbsp;前へ</a></p>",
+    pager:{
+      open:"<ul>",
+      item_current:{
+        open:"<li class=\"current\"><a href=\"#LayerContents\">",
+        close:"</a></li>"
+      },
+      item:{
+        open:"<li><a href=\"#LayerContents\">",
+        close:"</a></li>"
+      },
+      close:"</ul>"
+    },
+    next:"<p class=\"next\"><a href=\"#LayerContents\">次へ&nbsp;&gt;</a></p>",
+    last:"<p class=\"last\"><a href=\"#LayerContents\">最後&nbsp;&gt;&gt;</a></p>"
+  },
+  close:"</div>"
+},
+close:"</div>"
+    };
+
+    EntYearlyLst.init({
+      list_parent_id: 'LayerContentsBody',
+      list_wrapper_id: 'NewsListWrapper',
+      prop_id: 'NewsYearlyList',
+      prop_class: '',
+      datalist: data.datalist,
+      field: 'key__news_publish_date',
+      reverse: true,
+      primer: parseInt,
+      max_page_list_item_num: 10,
+      paginate_enabled: true,
+      paginationlink_display: 'both',
+      paginate_scroll_taget_id: 'LayerContents',
+      paginate_pnbtn_always_display: true,
+      pagination_link_btn_selecters: prm__pagination_link_btn_selecters,
+      source__listview_wrapper: prm__source__listview_wrapper,
+      source__hash_pagination_link: prm__source__hash_pagination_link,
+      source_empty: '<p>現在公開中のお知らせはありません。</p>',
+      fn__getSource_ListItem: function(item){
+return getSource_NewsYearlyList_item(item);
+        },
+      cb_end__updateSource_PaginationLink: function(refKMJSONListView, output_source){
+return getSource_CustomPaginationLink(refKMJSONListView, output_source);
+      }
+      });
+
+  })
+  .error(function(jqXHR, textStatus, errorThrown) {
+    //getJSONの例外時処理.
+
+      console.log("エラー：" + textStatus);
+      console.log("テキスト：" + jqXHR.responseText);
+  });
+
+});
+
+
+function getSource_NewsYearlyList_item(item){
+
+  var source__item =
+    "<div class=\"news\">"
+//    + item.source__img_tag_set
+    + "<dl>"
+    + "<dt><time datetime=\"" + item.datetime__news_publish + "\">" + item.date__news_publish + "</time></dt>"
+    + "<dd><a href=\"" + item.url__entry_detail + "\">" + item.source__title + "</a></dd>"
+    + "</dl>"
+    + "</div>";
+
+  return source__item;
+}
+
+function getSource_CustomPaginationLink( refKMJSONListView, prm_source_PaginationLink ){
+
+  var reflstv = refKMJSONListView;
+  var output_source = prm_source_PaginationLink;
+
+  var entry_list_last_entry_number = ( (reflstv.paginate_focus + 1 ) * reflstv.max_page_list_item_num );
+  if ( entry_list_last_entry_number > reflstv.total_entry_num ){
+    entry_list_last_entry_number = reflstv.total_entry_num
+  }
+  var source__pagination_status =
+    "<p>"
+    + ( reflstv.paginate_focus * reflstv.max_page_list_item_num + 1 )
+    + "～"
+    + entry_list_last_entry_number
+    + "件目を表示&nbsp;/&nbsp;全<span>" + reflstv.total_entry_num + "</span>件</p>";
+
+    return output_source + source__pagination_status;
+}
+
+</script>
+
+</head>
+<body>
+
+<section id="LayerContentsBody">
+</section>
+
+</body>
+</html>
